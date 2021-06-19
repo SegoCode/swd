@@ -31,7 +31,7 @@ func logger(text string, errorlevel int) {
 
 	if errorlevel == ERR {
 		fmt.Println("[" + color.RedString("ERR") + "]  " + text)
-		os.Exit(2)
+		os.Exit(1)
 	}
 }
 
