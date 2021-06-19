@@ -22,7 +22,7 @@ Or better [donwload a binary](https://github.com/SegoCode/swd/releases).
 
 ## Parameters
 
-It's simple, there is only one parameter, the url of the thread you want to download.
+It's simple, there is only one parameter, the url of the steam workshop article you want to download.
 ```shell
 swd https://steamcommunity.com/sharedfiles/filedetails/?id=......
 ```
