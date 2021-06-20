@@ -16,6 +16,7 @@ run from source code (Golang installation required).
 ```shell
 git clone https://github.com/SegoCode/swd
 cd swd
+go get -d ./...
 go run swd.go https://steamcommunity.com/sharedfiles/filedetails/?id=...
 ```
 Or better [donwload a binary](https://github.com/SegoCode/swd/releases).
