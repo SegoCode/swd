@@ -22,7 +22,7 @@ const ERR = 3
 func logger(text string, errorlevel int) {
 
 	if errorlevel == INFO {
-		fmt.Println("[" + color.BlueString("INFO") + "]  " + text)
+		fmt.Println("[" + color.CyanString("INFO") + "]  " + text)
 	}
 
 	if errorlevel == WARNING {
@@ -37,8 +37,10 @@ func logger(text string, errorlevel int) {
 
 func DownloadFile(url string, filepath string) error {
 
-	loadSp := spinner.New(spinner.CharSets[43], 100*time.Millisecond)
-	loadSp.Prefix = "[" + color.BlueString("INFO") + "]  " + "RECEIVING DATA: "
+	loadSp := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+	loadSp.Prefix = "[" + color.CyanString("INFO") + "]  " + "RECEIVING DATA: "
+	loadSp.FinalMSG = "\033[F"
+
 	loadSp.Start()
 
 	out, err := os.Create(filepath) // Create the file
@@ -124,7 +126,6 @@ func main() {
 			panic(err)
 		} else {
 			logger("✔️ DOWNLOAD FINISHED IN "+(dir+string(os.PathSeparator)+idUrl+".zip"), INFO)
-			logger("💕 DON'T FORGET TO SUPPORT THE steamworkshopdownloader.io PROJECT ", INFO)
 		}
 
 	} else {
