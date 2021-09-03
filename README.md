@@ -1,5 +1,5 @@
 # swd
-<img  src="https://raw.githubusercontent.com/SegoCode/swd/main/media/demo.gif">
+<img  src="https://raw.githubusercontent.com/SegoCode/swd/main/media/demo1.2.gif">
 
 Easy to use, simply wrapper for [steamworkshopdownloader.io](https://steamworkshopdownloader.io/) API.
 
