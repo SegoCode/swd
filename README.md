@@ -11,12 +11,11 @@ swd downloads the files compressed in a zip file with the steam workshop article
 id_steamworkshop.zip
 ```
 
-run from source code (Golang installation required and set ``GO111MODULE=auto``).
+run from source code (Golang installation required).
 
 ```shell
 git clone https://github.com/SegoCode/swd
 cd swd
-go get -d ./...
 go run swd.go https://steamcommunity.com/sharedfiles/filedetails/?id=...
 ```
 Or better [donwload a binary](https://github.com/SegoCode/swd/releases).
