@@ -19,6 +19,8 @@ const INFO = 1
 const WARNING = 2
 const ERR = 3
 
+const ENDPOINT string = "https://node02.steamworkshopdownloader.io/prod//api/"
+
 func logger(text string, errorlevel int) {
 
 	if errorlevel == INFO {
@@ -86,7 +88,7 @@ func main() {
 	// Get initial request //
 	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
 	request := gorequest.New()
-	resp, body, _ := request.Post("https://node02.steamworkshopdownloader.io/prod//api/download/request").
+	resp, body, _ := request.Post(ENDPOINT+"download/request").
 		Set("Content-Type", "application/json").
 		Send(`{"publishedFileId":` + idUrl + `, "collectionId":0, "extract":true, "hidden":false, "direct":false, "autodownload":true}`).
 		End()
@@ -102,7 +104,7 @@ func main() {
 	var readyFile = false
 
 	for i := 0; i < 10; i++ { // Try 10 times for 2 seconds of waiting, total 20 seconds of preparation maximum
-		_, body, _ := request.Post("https://node02.steamworkshopdownloader.io/prod//api/download/status").
+		_, body, _ := request.Post(ENDPOINT+"download/status").
 			Set("Content-Type", "application/json").
 			Send(`{"uuids": ["` + uid + `"]}`).
 			End()
@@ -120,7 +122,7 @@ func main() {
 	// File ready, start download //
 	if readyFile {
 		dir, _ := os.Getwd()
-		err := DownloadFile("https://node02.steamworkshopdownloader.io/prod//api/download/transmit?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
+		err := DownloadFile(ENDPOINT+"download/transmit?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
 
 		if err != nil {
 			panic(err)
