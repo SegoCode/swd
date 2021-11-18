@@ -86,7 +86,7 @@ func main() {
 	// Get initial request //
 	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
 	request := gorequest.New()
-	resp, body, _ := request.Post("https://backend-02-prd.steamworkshopdownloader.io/api/download/request").
+	resp, body, _ := request.Post("https://node02.steamworkshopdownloader.io/prod//api/download/request").
 		Set("Content-Type", "application/json").
 		Send(`{"publishedFileId":` + idUrl + `, "collectionId":0, "extract":true, "hidden":false, "direct":false, "autodownload":true}`).
 		End()
@@ -102,7 +102,7 @@ func main() {
 	var readyFile = false
 
 	for i := 0; i < 10; i++ { // Try 10 times for 2 seconds of waiting, total 20 seconds of preparation maximum
-		_, body, _ := request.Post("https://backend-02-prd.steamworkshopdownloader.io/api/download/status").
+		_, body, _ := request.Post("https://node02.steamworkshopdownloader.io/prod//api/download/status").
 			Set("Content-Type", "application/json").
 			Send(`{"uuids": ["` + uid + `"]}`).
 			End()
@@ -120,7 +120,7 @@ func main() {
 	// File ready, start download //
 	if readyFile {
 		dir, _ := os.Getwd()
-		err := DownloadFile("https://backend-02-prd.steamworkshopdownloader.io/api/download/transmit?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
+		err := DownloadFile("https://node02.steamworkshopdownloader.io/prod//api/download/transmit?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
 
 		if err != nil {
 			panic(err)
