@@ -140,7 +140,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		} else {
-			logger("✔️ DOWNLOAD FINISHED IN "+(dir+string(os.PathSeparator)+idUrl+".zip"), INFO)
+			logger("✔️  DOWNLOAD FINISHED IN "+(dir+string(os.PathSeparator)+idUrl+".zip"), INFO)
 		}
 
 	} else {
