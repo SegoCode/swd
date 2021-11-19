@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -47,16 +48,16 @@ func DownloadFile(url string, filepath string) error {
 	loadSp.Start()
 
 	out, err := os.Create(filepath) // Create the file
-	defer out.Close()
 	if err != nil {
 		return err
 	}
+	defer out.Close()
 
 	resp, err := http.Get(url) // Get the data
-	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	_, err = io.Copy(out, resp.Body) // Write the body to file
 	if err != nil {
@@ -106,7 +107,7 @@ func main() {
 		End()
 
 	if resp.StatusCode != 200 {
-		logger("GAME NOT AVAILABLE OR SERVER IS DOWN", ERR)
+		logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), ERR)
 	} else {
 		logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
 	}
