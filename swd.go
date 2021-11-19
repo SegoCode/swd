@@ -12,6 +12,7 @@ import (
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/parnurzeal/gorequest"
+	"github.com/tcnksm/go-latest"
 	"github.com/tidwall/gjson"
 )
 
@@ -84,6 +85,17 @@ func main() {
 		logger("URL NOT VALID (Example: swd \"https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111\")", ERR)
 	}
 	// End Args validation //
+
+	githubTag := &latest.GithubTag{
+		Owner:      "SegoCode",
+		Repository: "swd",
+	}
+
+	res, _ := latest.Check(githubTag, "1.3.0")
+	if res.Outdated {
+		logger("NEW VERSION IS AVAILABLE, CHECK https://github.com/SegoCode/swd/releases", WARNING)
+
+	}
 
 	// Get initial request //
 	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
