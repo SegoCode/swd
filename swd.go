@@ -92,7 +92,7 @@ func main() {
 		Repository: "swd",
 	}
 
-	res, _ := latest.Check(githubTag, "1.3.0")
+	res, _ := latest.Check(githubTag, "1.4.0")
 	if res.Outdated {
 		logger("NEW VERSION IS AVAILABLE, CHECK https://github.com/SegoCode/swd/releases", WARNING)
 
