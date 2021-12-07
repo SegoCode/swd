@@ -21,7 +21,7 @@ const INFO = 1
 const WARNING = 2
 const ERR = 3
 
-const ENDPOINT string = "https://node02.steamworkshopdownloader.io/prod//api/"
+const ENDPOINT string = "https://node05.steamworkshopdownloader.io/prod//api/"
 
 func logger(text string, errorlevel int) {
 
@@ -103,7 +103,7 @@ func main() {
 	request := gorequest.New()
 	resp, body, _ := request.Post(ENDPOINT+"download/request").
 		Set("Content-Type", "application/json").
-		Send(`{"publishedFileId":` + idUrl + `, "collectionId":0, "extract":true, "hidden":false, "direct":false, "autodownload":true}`).
+		Send(`{"publishedFileId":` + idUrl + `, "collectionId":null, "hidden":false, "downloadFormat":"raw", "autodownload":true}`).
 		End()
 
 	if resp.StatusCode != 200 {
@@ -115,7 +115,8 @@ func main() {
 	// Download request //
 	uid := gjson.Get(body, "uuid").String()
 	var readyFile = false
-
+	var storageNode = ""
+	var storagepath = ""
 	for i := 0; i < 10; i++ { // Try 10 times for 2 seconds of waiting, total 20 seconds of preparation maximum
 		_, body, _ := request.Post(ENDPOINT+"download/status").
 			Set("Content-Type", "application/json").
@@ -126,6 +127,8 @@ func main() {
 
 		if strings.Contains(body, "prepared") {
 			readyFile = true
+			storageNode = gjson.Get(body, uid+".storageNode").String()
+			storagepath = gjson.Get(body, uid+".storagePath").String()
 			logger("INITIATING DOWNLOADING. . . ", INFO)
 			break
 		}
@@ -135,7 +138,7 @@ func main() {
 	// File ready, start download //
 	if readyFile {
 		dir, _ := os.Getwd()
-		err := DownloadFile(ENDPOINT+"download/transmit?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
+		err := DownloadFile("https://"+storageNode+"/prod//storage/"+storagepath+"?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
 
 		if err != nil {
 			panic(err)
