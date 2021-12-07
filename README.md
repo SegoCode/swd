@@ -1,5 +1,3 @@
-⚠️ 6/11/2021 - doesn't work any more. This repo is no longer maintained, see this [issue](https://github.com/SegoCode/swd/issues/2)
-
 # swd 
 <img  src="https://raw.githubusercontent.com/SegoCode/swd/main/media/demo1.1.gif">
 
