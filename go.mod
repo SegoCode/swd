@@ -12,7 +12,7 @@ require (
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/smartystreets/goconvey v1.7.2 // indirect
-	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e // indirect
+	github.com/tcnksm/go-latest v0.0.0-20170313132115-e3007ae9052e
 	github.com/tidwall/gjson v1.10.2
 	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
 	moul.io/http2curl v1.0.0 // indirect

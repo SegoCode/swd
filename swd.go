@@ -30,11 +30,11 @@ func logger(text string, errorlevel int) {
 	}
 
 	if errorlevel == WARNING {
-		fmt.Println("[" + color.YellowString("WARNING") + "]  " + text)
+		fmt.Println("[" + color.YellowString("WARN") + "]  " + text)
 	}
 
 	if errorlevel == ERR {
-		fmt.Println("[" + color.RedString("ERR") + "]  " + text)
+		fmt.Println("[" + color.RedString("ERR") + "]   " + text)
 		os.Exit(1)
 	}
 }
@@ -92,24 +92,31 @@ func main() {
 		Repository: "swd",
 	}
 
-	res, _ := latest.Check(githubTag, "1.4.0")
-	if res.Outdated {
-		logger("NEW VERSION IS AVAILABLE, CHECK https://github.com/SegoCode/swd/releases", WARNING)
-
+	res, err := latest.Check(githubTag, "1.4.0")
+	if err == nil {
+		if res.Outdated {
+			logger("NEW VERSION IS AVAILABLE, CHECK https://github.com/SegoCode/swd/releases", WARNING)
+		}
+	} else {
+		logger("CAN'T CHECK THE LATEST VERSION IN GITHUB, CHECK https://github.com/SegoCode/swd/releases", WARNING)
 	}
 
 	// Get initial request //
 	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
 	request := gorequest.New()
-	resp, body, _ := request.Post(ENDPOINT+"download/request").
+	resp, body, errs := request.Post(ENDPOINT+"download/request").
 		Set("Content-Type", "application/json").
 		Send(`{"publishedFileId":` + idUrl + `, "collectionId":null, "hidden":false, "downloadFormat":"raw", "autodownload":true}`).
 		End()
 
-	if resp.StatusCode != 200 {
-		logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), ERR)
+	if errs != nil {
+		logger("CAN'T CONNECT TO THE SERVER, EXITING . . .", ERR)
 	} else {
-		logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
+		if resp.StatusCode != 200 {
+			logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), ERR)
+		} else {
+			logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
+		}
 	}
 
 	// Download request //
