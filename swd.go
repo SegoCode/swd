@@ -85,6 +85,11 @@ func main() {
 	if idUrl == "" {
 		logger("URL NOT VALID (Example: swd \"https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111\")", ERR)
 	}
+
+	var downloadFormat = "raw"
+	if len(os.Args) >= 3 && (os.Args[2] == "--downloadFormat") {
+		downloadFormat = os.Args[3]
+	}
 	// End Args validation //
 
 	githubTag := &latest.GithubTag{
@@ -92,7 +97,7 @@ func main() {
 		Repository: "swd",
 	}
 
-	res, err := latest.Check(githubTag, "1.4.0")
+	res, err := latest.Check(githubTag, "1.5.0")
 	if err == nil {
 		if res.Outdated {
 			logger("NEW VERSION IS AVAILABLE, CHECK https://github.com/SegoCode/swd/releases", WARNING)
@@ -106,7 +111,7 @@ func main() {
 	request := gorequest.New()
 	resp, body, errs := request.Post(ENDPOINT+"download/request").
 		Set("Content-Type", "application/json").
-		Send(`{"publishedFileId":` + idUrl + `, "collectionId":null, "hidden":false, "downloadFormat":"raw", "autodownload":true}`).
+		Send(`{"publishedFileId":` + idUrl + `, "collectionId":null, "hidden":false, "downloadFormat":"` + downloadFormat + `", "autodownload":true}`).
 		End()
 
 	if errs != nil {
