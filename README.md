@@ -16,7 +16,8 @@ run from source code (Golang installation required).
 ```shell
 git clone https://github.com/SegoCode/swd
 cd swd
-go run swd.go https://steamcommunity.com/sharedfiles/filedetails/?id=...
+go get -d ./...
+go run swd.go https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111
 ```
 Or better [donwload a binary](https://github.com/SegoCode/swd/releases).
 
@@ -24,7 +25,12 @@ Or better [donwload a binary](https://github.com/SegoCode/swd/releases).
 
 It's simple, there is only one parameter, the url of the steam workshop article you want to download.
 ```shell
-swd https://steamcommunity.com/sharedfiles/filedetails/?id=......
+swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111
+```
+
+But... steamworkshopdownloader.io has an optional parameter for download, if you know any you can specify 
+```shell
+swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111 --downloadFormat gmaextract
 ```
 
 ## Downloads
