@@ -21,7 +21,7 @@ const INFO = 1
 const WARNING = 2
 const ERR = 3
 
-const ENDPOINT string = "https://node05.steamworkshopdownloader.io/prod//api/"
+const ENDPOINT string = "https://node02.steamworkshopdownloader.io/prod//api/"
 
 func logger(text string, errorlevel int) {
 
