@@ -28,9 +28,9 @@ It's simple, there is only one parameter, the url of the steam workshop article 
 swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111
 ```
 
-But... wsd has an optionals parameters for download for example ```gmaextract``` and more, get all info with this parameter.
+But... steamworkshopdownloader.io has an optional parameter for download, if you know any you can specify 
 ```shell
-swd -help
+swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111 --downloadFormat gmaextract
 ```
 
 ## Downloads
