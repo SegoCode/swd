@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"flag"
 
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
@@ -18,19 +17,16 @@ import (
 	"github.com/tidwall/gjson"
 )
 
+const APP_VERSION = "1.7.0"
+
 const INFO = 1
 const WARNING = 2
 const ERR = 3
 
-// START_NODE and END_NODE get from (steamworkshopdownloader.io)
+// START_NODE and END_NODE get from (steamworkshopdownloader.io) thanks to @Cod3dDOT
+const START_NODE = 4
 const DEFAULT_NODE = 8
-const START_NODE = 4  
 const END_NODE = 8
-
-func GetENDPOINT(node int) string {
-	var ENDPOINT string = "https://node0" + strconv.Itoa(node) + ".steamworkshopdownloader.io/prod//api/"
-	return ENDPOINT
-}
 
 func logger(text string, errorlevel int) {
 
@@ -46,6 +42,11 @@ func logger(text string, errorlevel int) {
 		fmt.Println("[" + color.RedString("ERR") + "]   " + text)
 		os.Exit(1)
 	}
+}
+
+func GetEndpoint(node int) string {
+	endpoint := "https://node0" + strconv.Itoa(node) + ".steamworkshopdownloader.io/prod//api/"
+	return endpoint
 }
 
 func DownloadFile(url string, filepath string) error {
@@ -79,7 +80,6 @@ func DownloadFile(url string, filepath string) error {
 }
 
 func getUUID(api string, publishedFileId string, downloadFormat string) string {
-	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
 	request := gorequest.New()
 	resp, body, errs := request.Post(api).
 		Set("Content-Type", "application/json").
@@ -89,50 +89,40 @@ func getUUID(api string, publishedFileId string, downloadFormat string) string {
 	if errs != nil {
 		logger("CAN'T CONNECT TO THE SERVER", WARNING)
 		return "0"
-	} else {
-		if resp.StatusCode != 200 {
-			logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), WARNING)
-			return "0"
-		} else {
-			logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
-			return body
-		}
 	}
-}
 
+	if resp.StatusCode != 200 {
+		logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), WARNING)
+		return "0"
+	} else {
+		logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
+		return body
+	}
+
+}
 
 func main() {
 
-	// Get Args //
-	var fileUrl string
-    flag.StringVar(&fileUrl, "url", "", "Url of file in steam workshop")
-	var fileId string
-	flag.StringVar(&fileId, "id", "", "Published file id of the file in steam workshop")
-	var downloadFormat string
-	flag.StringVar(&downloadFormat, "format", "raw", "Download format")
-	var node int
-	flag.IntVar(&node, "node", DEFAULT_NODE, "Server node (default: 8)")
-	flag.Parse()
-
-
-	// Validation Args //
-	if fileUrl == "" && fileId == "" {
-		logger("NEED A FILE URL OR PUBLISHED FILE ID, -help for usage", ERR)
+	// Args validation //
+	if len(os.Args) <= 1 {
+		logger("USAGE: swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111", ERR)
 	}
 
+	url, err := url.ParseRequestURI(os.Args[1])
+	if err != nil {
+		logger("URL NOT VALID (Example: swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111)", ERR)
+	}
+
+	fileId := url.Query().Get("id")
 	if fileId == "" {
-		fileUrl, err := url.ParseRequestURI(fileUrl)
-		if err != nil {
-			logger("URL NOT VALID (Example: swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111)", ERR)
-		}
-		fileId = fileUrl.Query().Get("id")
+		logger("URL NOT VALID (Example: swd \"https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111\")", ERR)
 	}
 
-	if node < START_NODE || node > END_NODE {
-		logger("NODE NOT VALID (Node must be between 4 and 8)", ERR)
+	var downloadFormat = "raw"
+	if len(os.Args) >= 3 && (os.Args[2] == "--downloadFormat") {
+		downloadFormat = os.Args[3]
 	}
-		
-	logger("FileId: " + fileId, INFO)
+
 	// End Args validation //
 
 	githubTag := &latest.GithubTag{
@@ -140,7 +130,7 @@ func main() {
 		Repository: "swd",
 	}
 
-	res, err := latest.Check(githubTag, "1.6.0")
+	res, err := latest.Check(githubTag, APP_VERSION)
 	if err == nil {
 		if res.Outdated {
 			logger("NEW VERSION IS AVAILABLE, CHECK https://github.com/SegoCode/swd/releases", WARNING)
@@ -151,17 +141,19 @@ func main() {
 
 	// Get initial request //
 	var initResponse string
-	var ENDPOINT string
+	var endpoint string
 
-	for i := node; i >= START_NODE; i-- {  // Node can be 4 to 8
-		ENDPOINT = GetENDPOINT(i)
-		initResponse = getUUID(ENDPOINT + "download/request", fileId, downloadFormat)
-		logger("REQUESTING DOWNLOAD FROM NODE " + strconv.Itoa(i), INFO)
+	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
+	for i := DEFAULT_NODE; i >= START_NODE; i-- { // Check node range
+		endpoint = GetEndpoint(i)
+		logger("REQUESTING DOWNLOAD FROM SERVER NUMBER "+strconv.Itoa(i), INFO)
+		initResponse = getUUID(endpoint+"download/request", fileId, downloadFormat)
 		if initResponse != "0" {
 			break
-		} else {
-			logger("TRYING TO CONNECT TO NODE " + strconv.Itoa(i), INFO)
 		}
+	}
+	if initResponse == "0" {
+		logger("CAN'T FOUND AVAILABLE SERVER", ERR)
 	}
 
 	// Download request //
@@ -171,7 +163,7 @@ func main() {
 	var storagepath = ""
 	request := gorequest.New()
 	for i := 0; i < 10; i++ { // Try 10 times for 2 seconds of waiting, total 20 seconds of preparation maximum
-		_, body, _ := request.Post(ENDPOINT+"download/status").
+		_, body, _ := request.Post(endpoint+"download/status").
 			Set("Content-Type", "application/json").
 			Send(`{"uuids": ["` + uid + `"]}`).
 			End()
@@ -200,8 +192,7 @@ func main() {
 		}
 
 	} else {
-		logger("FAIL THE SERVER IS BUSY", ERR)
+		logger("THE SERVER IS BUSY", ERR)
 	}
 
 }
-
