@@ -21,7 +21,12 @@ const INFO = 1
 const WARNING = 2
 const ERR = 3
 
-const ENDPOINT string = "https://node02.steamworkshopdownloader.io/prod//api/"
+const DEFAULT_NODE = 8
+
+func GetENDPOINT(node int) string {
+	var ENDPOINT string = "https://node0" + strconv.Itoa(node) + ".steamworkshopdownloader.io/prod//api/"
+	return ENDPOINT
+}
 
 func logger(text string, errorlevel int) {
 
@@ -69,6 +74,29 @@ func DownloadFile(url string, filepath string) error {
 	return nil
 }
 
+func getUUID(api string, publishedFileId string, downloadFormat string) string {
+	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
+	request := gorequest.New()
+	resp, body, errs := request.Post(api).
+		Set("Content-Type", "application/json").
+		Send(`{"publishedFileId":` + publishedFileId + `, "collectionId":null, "hidden":false, "downloadFormat":"` + downloadFormat + `", "autodownload":true}`).
+		End()
+
+	if errs != nil {
+		logger("CAN'T CONNECT TO THE SERVER", WARNING)
+		return "0"
+	} else {
+		if resp.StatusCode != 200 {
+			logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), WARNING)
+			return "0"
+		} else {
+			logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
+			return body
+		}
+	}
+}
+
+
 func main() {
 
 	// Args validation //
@@ -90,6 +118,12 @@ func main() {
 	if len(os.Args) >= 3 && (os.Args[2] == "--downloadFormat") {
 		downloadFormat = os.Args[3]
 	}
+
+	var node = DEFAULT_NODE
+	if len(os.Args) >= 3 && (os.Args[2] == "--node") {
+		node, err = strconv.Atoi(os.Args[3])
+	}
+
 	// End Args validation //
 
 	githubTag := &latest.GithubTag{
@@ -107,28 +141,26 @@ func main() {
 	}
 
 	// Get initial request //
-	logger("CHEKING IF THE GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS . . .", INFO)
-	request := gorequest.New()
-	resp, body, errs := request.Post(ENDPOINT+"download/request").
-		Set("Content-Type", "application/json").
-		Send(`{"publishedFileId":` + idUrl + `, "collectionId":null, "hidden":false, "downloadFormat":"` + downloadFormat + `", "autodownload":true}`).
-		End()
+	var initResponse string
+	var ENDPOINT string
 
-	if errs != nil {
-		logger("CAN'T CONNECT TO THE SERVER, EXITING . . .", ERR)
-	} else {
-		if resp.StatusCode != 200 {
-			logger("GAME NOT AVAILABLE OR SERVER IS DOWN, CODE RESPONSE: "+strconv.Itoa(resp.StatusCode), ERR)
+	for i := node; i > 0; i-- {
+		ENDPOINT = GetENDPOINT(i)
+		initResponse = getUUID(ENDPOINT + "download/request", idUrl, downloadFormat)
+		logger("REQUESTING DOWNLOAD FROM NODE " + strconv.Itoa(node), INFO)
+		if initResponse != "0" {
+			break
 		} else {
-			logger("GAME IS AVAILABLE FOR STEAM WORKSHOP DOWNLOADS", INFO)
+			logger("TRYING TO CONNECT TO NODE " + strconv.Itoa(node), INFO)
 		}
 	}
 
 	// Download request //
-	uid := gjson.Get(body, "uuid").String()
+	uid := gjson.Get(initResponse, "uuid").String()
 	var readyFile = false
 	var storageNode = ""
 	var storagepath = ""
+	request := gorequest.New()
 	for i := 0; i < 10; i++ { // Try 10 times for 2 seconds of waiting, total 20 seconds of preparation maximum
 		_, body, _ := request.Post(ENDPOINT+"download/status").
 			Set("Content-Type", "application/json").
@@ -163,3 +195,4 @@ func main() {
 	}
 
 }
+
