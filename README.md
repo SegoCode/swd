@@ -17,36 +17,20 @@ run from source code (Golang installation required).
 git clone https://github.com/SegoCode/swd
 cd swd
 go get -d ./...
-go run swd.go -url="https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111"
-go run swd.go -id=1111111111
+go run swd.go https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111
 ```
 Or better [donwload a binary](https://github.com/SegoCode/swd/releases).
 
 ## Parameters
 
-Use -h or --help flags to get  help for the program.
+It's simple, there is only one parameter, the url of the steam workshop article you want to download.
+```shell
+swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111
+```
+
+But... wsd has an optionals parameters for download for example ```gmaextract``` and more, get all info with this parameter.
 ```shell
 swd -help
-```
-
-Use -url for input the url of the steam workshop article you want to download.
-```shell
-swd -url="https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111"
-```
-
-Use -id for input the id of the steam workshop article you want to download.
-```shell
-swd -id=1111111111
-```
-
--format (optional) for choosing the format
-```shell
-swd -id=1111111111 -format=gmaextract
-```
-
--node (optional) for choosing the node server to download ( between 4 and 8 )
-```shell
-swd -id=1111111111 -node=6
 ```
 
 ## Downloads
