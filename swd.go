@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"flag"
 
 	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
@@ -21,7 +22,10 @@ const INFO = 1
 const WARNING = 2
 const ERR = 3
 
+// START_NODE and END_NODE get from (steamworkshopdownloader.io)
 const DEFAULT_NODE = 8
+const START_NODE = 4  
+const END_NODE = 8
 
 func GetENDPOINT(node int) string {
 	var ENDPOINT string = "https://node0" + strconv.Itoa(node) + ".steamworkshopdownloader.io/prod//api/"
@@ -99,31 +103,36 @@ func getUUID(api string, publishedFileId string, downloadFormat string) string {
 
 func main() {
 
-	// Args validation //
-	if len(os.Args) <= 1 {
-		logger("USAGE: swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111", ERR)
+	// Get Args //
+	var fileUrl string
+    flag.StringVar(&fileUrl, "url", "", "Url of file in steam workshop")
+	var fileId string
+	flag.StringVar(&fileId, "id", "", "Published file id of the file in steam workshop")
+	var downloadFormat string
+	flag.StringVar(&downloadFormat, "format", "raw", "Download format")
+	var node int
+	flag.IntVar(&node, "node", DEFAULT_NODE, "Server node (default: 8)")
+	flag.Parse()
+
+
+	// Validation Args //
+	if fileUrl == "" && fileId == "" {
+		logger("NEED A FILE URL OR PUBLISHED FILE ID, -help for usage", ERR)
 	}
 
-	url, err := url.ParseRequestURI(os.Args[1])
-	if err != nil {
-		logger("URL NOT VALID (Example: swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111)", ERR)
+	if fileId == "" {
+		fileUrl, err := url.ParseRequestURI(fileUrl)
+		if err != nil {
+			logger("URL NOT VALID (Example: swd https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111)", ERR)
+		}
+		fileId = fileUrl.Query().Get("id")
 	}
 
-	idUrl := url.Query().Get("id")
-	if idUrl == "" {
-		logger("URL NOT VALID (Example: swd \"https://steamcommunity.com/sharedfiles/filedetails/?id=1111111111\")", ERR)
+	if node < START_NODE || node > END_NODE {
+		logger("NODE NOT VALID (Node must be between 4 and 8)", ERR)
 	}
-
-	var downloadFormat = "raw"
-	if len(os.Args) >= 3 && (os.Args[2] == "--downloadFormat") {
-		downloadFormat = os.Args[3]
-	}
-
-	var node = DEFAULT_NODE
-	if len(os.Args) >= 3 && (os.Args[2] == "--node") {
-		node, err = strconv.Atoi(os.Args[3])
-	}
-
+		
+	logger("FileId: " + fileId, INFO)
 	// End Args validation //
 
 	githubTag := &latest.GithubTag{
@@ -144,14 +153,14 @@ func main() {
 	var initResponse string
 	var ENDPOINT string
 
-	for i := node; i > 0; i-- {
+	for i := node; i >= START_NODE; i-- {  // Node can be 4 to 8
 		ENDPOINT = GetENDPOINT(i)
-		initResponse = getUUID(ENDPOINT + "download/request", idUrl, downloadFormat)
-		logger("REQUESTING DOWNLOAD FROM NODE " + strconv.Itoa(node), INFO)
+		initResponse = getUUID(ENDPOINT + "download/request", fileId, downloadFormat)
+		logger("REQUESTING DOWNLOAD FROM NODE " + strconv.Itoa(i), INFO)
 		if initResponse != "0" {
 			break
 		} else {
-			logger("TRYING TO CONNECT TO NODE " + strconv.Itoa(node), INFO)
+			logger("TRYING TO CONNECT TO NODE " + strconv.Itoa(i), INFO)
 		}
 	}
 
@@ -182,12 +191,12 @@ func main() {
 	// File ready, start download //
 	if readyFile {
 		dir, _ := os.Getwd()
-		err := DownloadFile("https://"+storageNode+"/prod//storage/"+storagepath+"?uuid="+uid, dir+string(os.PathSeparator)+idUrl+".zip")
+		err := DownloadFile("https://"+storageNode+"/prod//storage/"+storagepath+"?uuid="+uid, dir+string(os.PathSeparator)+fileId+".zip")
 
 		if err != nil {
 			panic(err)
 		} else {
-			logger("✔️  DOWNLOAD FINISHED IN "+(dir+string(os.PathSeparator)+idUrl+".zip"), INFO)
+			logger("✔️  DOWNLOAD FINISHED IN "+(dir+string(os.PathSeparator)+fileId+".zip"), INFO)
 		}
 
 	} else {
