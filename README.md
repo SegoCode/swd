@@ -1,4 +1,4 @@
-### ⚠️ 28/05/2022 - doesn't work any more. **This repo is no longer maintained**, [api no longer serving any files.](https://www.reddit.com/r/swd_io/comments/uy55qg/we_are_no_longer_serving_any_files_through_our/)
+### ⚠️ 28/05/2022 - doesn't work any more. **This repo is no longer maintained**, [API has been shut down.](https://www.reddit.com/r/swd_io/comments/uy55qg/we_are_no_longer_serving_any_files_through_our/)
 
 # swd 
 <img  src="https://raw.githubusercontent.com/SegoCode/swd/main/media/demo1.1.gif">
