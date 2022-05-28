@@ -1,4 +1,4 @@
-### ⚠️ 28/05/2022 - doesn't work anymore. **This repo is no longer maintained**, [API has been shut down.](https://www.reddit.com/r/swd_io/comments/uy55qg/we_are_no_longer_serving_any_files_through_our/)
+### ⚠️ 28/05/2022 - doesn't work anymore. **This repo is no longer maintained**, [API has been shutdown.](https://www.reddit.com/r/swd_io/comments/uy55qg/we_are_no_longer_serving_any_files_through_our/)
 
 <details>
   <summary>We are no longer serving any files through our network</summary> 
