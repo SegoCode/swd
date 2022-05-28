@@ -1,5 +1,11 @@
 ### ⚠️ 28/05/2022 - doesn't work anymore. **This repo is no longer maintained**, [API has been shut down.](https://www.reddit.com/r/swd_io/comments/uy55qg/we_are_no_longer_serving_any_files_through_our/)
 
+<details>
+  <summary>We are no longer serving any files through our network</summary> 
+  <img  src="https://raw.githubusercontent.com/SegoCode/swd/main/media/We are no longer serving any files through our network. swd_io.png">
+</details>
+
+
 # swd 
 <img  src="https://raw.githubusercontent.com/SegoCode/swd/main/media/demo1.1.gif">
 
